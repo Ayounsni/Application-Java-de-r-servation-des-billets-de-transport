@@ -1,20 +1,26 @@
 package models;
 
+import models.enums.PartnerStatus;
+import models.enums.TransportType;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class Partner {
     private final UUID id;
     private String companyName;
     private String businessContact;
-    private String transportType;
+    private TransportType transportType;
     private String geographicZone;
     private String specialConditions;
-    private String partnerStatus;
+    private PartnerStatus partnerStatus;
     private String creationDate;
+    private List<Contract> contracts;
 
-    // Constructeur
-    public Partner(String companyName, String businessContact, String transportType, String geographicZone, String specialConditions, String partnerStatus, String creationDate) {
-        this.id = UUID.randomUUID(); // Génère un ID unique
+
+    public Partner(String companyName, String businessContact, TransportType transportType, String geographicZone, String specialConditions, PartnerStatus partnerStatus, String creationDate) {
+        this.id = UUID.randomUUID();
         this.companyName = companyName;
         this.businessContact = businessContact;
         this.transportType = transportType;
@@ -22,9 +28,10 @@ public class Partner {
         this.specialConditions = specialConditions;
         this.partnerStatus = partnerStatus;
         this.creationDate = creationDate;
+        this.contracts = new ArrayList<>();
     }
 
-    // Getters et Setters
+
     public UUID getId() {
         return id;
     }
@@ -45,11 +52,11 @@ public class Partner {
         this.businessContact = businessContact;
     }
 
-    public String getTransportType() {
+    public TransportType getTransportType() {
         return transportType;
     }
 
-    public void setTransportType(String transportType) {
+    public void setTransportType(TransportType transportType) {
         this.transportType = transportType;
     }
 
@@ -69,11 +76,11 @@ public class Partner {
         this.specialConditions = specialConditions;
     }
 
-    public String getPartnerStatus() {
+    public PartnerStatus getPartnerStatus() {
         return partnerStatus;
     }
 
-    public void setPartnerStatus(String partnerStatus) {
+    public void setPartnerStatus(PartnerStatus partnerStatus) {
         this.partnerStatus = partnerStatus;
     }
 
@@ -84,18 +91,13 @@ public class Partner {
     public void setCreationDate(String creationDate) {
         this.creationDate = creationDate;
     }
-
-    @Override
-    public String toString() {
-        return "models.Partner{" +
-                "id=" + id +
-                ", companyName='" + companyName + '\'' +
-                ", businessContact='" + businessContact + '\'' +
-                ", transportType='" + transportType + '\'' +
-                ", geographicZone='" + geographicZone + '\'' +
-                ", specialConditions='" + specialConditions + '\'' +
-                ", partnerStatus='" + partnerStatus + '\'' +
-                ", creationDate='" + creationDate + '\'' +
-                '}';
+    public List<Contract> getContracts() {
+        return contracts;
     }
+
+    public void addContract(Contract contract) {
+        contracts.add(contract);
+    }
+
+
 }

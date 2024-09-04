@@ -2,9 +2,11 @@ package services;
 
 import db.DbFunctions;
 import models.Partner;
+import models.enums.PartnerStatus;
+import models.enums.TransportType;
 
 import java.sql.Connection;
-import java.sql.Date; // Importer java.sql.Date pour la conversion
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -18,10 +20,9 @@ public class PartnershipManager {
 
     public PartnershipManager() {
         this.db = DbFunctions.getInstance();
-        // List<models.Partner> partners = new ArrayList<>(); // Cette ligne est inutile si vous ne l'utilisez pas
     }
 
-    // Méthode pour ajouter un partenaire
+
     public void addPartner(Partner partner) {
         String query = "INSERT INTO partner (id, companyName, businessContact, transportType, geographicZone, specialConditions, partnerStatus, creationDate) VALUES (?, ?, ?, ?::transporttype, ?, ?, ?::partnerstatus, ?)";
         try {
@@ -34,8 +35,8 @@ public class PartnershipManager {
         }
     }
 
-    // Méthode pour modifier un partenaire
-    public void modifyPartner(UUID partnerId, String companyName, String businessContact, String transportType, String geographicZone, String specialConditions, String partnerStatus, String creationDate) {
+
+    public void modifyPartner(UUID partnerId, String companyName, String businessContact, TransportType transportType, String geographicZone, String specialConditions, PartnerStatus partnerStatus, String creationDate) {
         String query = "UPDATE partner SET companyName = ?, businessContact = ?, transportType = ?::transporttype, geographicZone = ?, specialConditions = ?, partnerStatus = ?::partnerstatus, creationDate = ? WHERE id = ?";
         try {
             int rowsUpdated = getRowsUpdated(partnerId, companyName, businessContact, transportType, geographicZone, specialConditions, partnerStatus, creationDate, query);
@@ -47,7 +48,7 @@ public class PartnershipManager {
         }
     }
 
-    // Méthode pour supprimer un partenaire
+
     public void deletePartner(UUID partnerId) {
         String query = "DELETE FROM partner WHERE id = ?";
         try (Connection conn = db.getConnection(); PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -61,7 +62,7 @@ public class PartnershipManager {
         }
     }
 
-    // Méthode pour afficher tous les partenaires
+
     public void displayPartners() {
         String query = "SELECT * FROM partner";
         try (Connection conn = db.getConnection(); PreparedStatement stmt = conn.prepareStatement(query); ResultSet rs = stmt.executeQuery()) {
@@ -69,10 +70,10 @@ public class PartnershipManager {
                 UUID id = (UUID) rs.getObject("id");
                 String companyName = rs.getString("companyName");
                 String businessContact = rs.getString("businessContact");
-                String transportType = rs.getString("transportType"); // Assurez-vous que le type est correct pour le type enum
+                String transportType = rs.getString("transportType");
                 String geographicZone = rs.getString("geographicZone");
                 String specialConditions = rs.getString("specialConditions");
-                String partnerStatus = rs.getString("partnerStatus"); // Assurez-vous que le type est correct pour le type enum
+                String partnerStatus = rs.getString("partnerStatus");
                 Date creationDate = rs.getDate("creationDate");
 
                 System.out.println("models.Partner ID: " + id);
@@ -95,23 +96,23 @@ public class PartnershipManager {
             stmt.setObject(1, partner.getId());
             stmt.setString(2, partner.getCompanyName());
             stmt.setString(3, partner.getBusinessContact());
-            stmt.setObject(4, partner.getTransportType()); // Assurez-vous que le type est correct pour le type enum
+            stmt.setObject(4, partner.getTransportType(), java.sql.Types.OTHER);
             stmt.setString(5, partner.getGeographicZone());
             stmt.setString(6, partner.getSpecialConditions());
-            stmt.setObject(7, partner.getPartnerStatus()); // Assurez-vous que le type est correct pour le type enum
+            stmt.setObject(7, partner.getPartnerStatus(),  java.sql.Types.OTHER);
             stmt.setDate(8, convertStringToDate(partner.getCreationDate()));
             return stmt.executeUpdate();
         }
     }
 
-    private int getRowsUpdated(UUID partnerId, String companyName, String businessContact, String transportType, String geographicZone, String specialConditions, String partnerStatus, String creationDate, String query) throws SQLException {
+    private int getRowsUpdated(UUID partnerId, String companyName, String businessContact, TransportType transportType, String geographicZone, String specialConditions, PartnerStatus partnerStatus, String creationDate, String query) throws SQLException {
         try (Connection conn = db.getConnection(); PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setString(1, companyName);
             stmt.setString(2, businessContact);
-            stmt.setObject(3, transportType); // Assurez-vous que le type est correct pour le type enum
+            stmt.setObject(3, transportType);
             stmt.setString(4, geographicZone);
             stmt.setString(5, specialConditions);
-            stmt.setObject(6, partnerStatus); // Assurez-vous que le type est correct pour le type enum
+            stmt.setObject(6, partnerStatus);
             stmt.setDate(7, convertStringToDate(creationDate));
             stmt.setObject(8, partnerId);
             return stmt.executeUpdate();
@@ -125,7 +126,29 @@ public class PartnershipManager {
             return new Date(parsedDate.getTime());
         } catch (ParseException e) {
             System.err.println("Failed to convert string to date: " + e.getMessage());
-            return null; // Gérer les erreurs de conversion ici si nécessaire
+            return null;
         }
+    }
+    public Partner getPartnerById(UUID partnerId) {
+        String query = "SELECT * FROM partner WHERE id = ?";
+        try (Connection conn = db.getConnection(); PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setObject(1, partnerId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    String companyName = rs.getString("companyName");
+                    String businessContact = rs.getString("businessContact");
+                    TransportType transportType = TransportType.valueOf(rs.getString("transportType"));
+                    String geographicZone = rs.getString("geographicZone");
+                    String specialConditions = rs.getString("specialConditions");
+                    PartnerStatus partnerStatus = PartnerStatus.valueOf(rs.getString("partnerStatus"));
+                    String creationDate = rs.getString("creationDate");
+
+                    return new Partner(companyName, businessContact, transportType, geographicZone, specialConditions, partnerStatus, creationDate);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("An error occurred while retrieving the partner: " + e.getMessage());
+        }
+        return null;  // Retourne null si le partenaire n'est pas trouvé
     }
 }

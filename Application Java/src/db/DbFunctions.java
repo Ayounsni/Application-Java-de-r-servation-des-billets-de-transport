@@ -8,10 +8,9 @@ public class DbFunctions {
     private static DbFunctions instance;
     private Connection conn;
 
-    // Private constructor to prevent instantiation
     private DbFunctions() {}
 
-    // Static method to get the single instance of the class
+
     public static DbFunctions getInstance() {
         if (instance == null) {
             instance = new DbFunctions();
