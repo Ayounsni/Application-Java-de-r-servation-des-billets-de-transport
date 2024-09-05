@@ -13,10 +13,10 @@ import services.ContractManager;
 import services.PartnershipManager;
 import services.PromoManager;
 import services.TicketManager;
+import utils.InputValidator;
 
 import java.math.BigDecimal;
 import java.sql.Date;
-import java.util.List;
 import java.util.Scanner;
 import java.util.UUID;
 
@@ -33,73 +33,140 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
         boolean running = true;
 
-        while (running) {
 
-            System.out.println("\nPartnership Management System");
+        while (running) {
+            System.out.println("\nMain Menu:");
+            System.out.println("1. Partner Manager");
+            System.out.println("2. Contract Manager");
+            System.out.println("3. Promo Manager");
+            System.out.println("4. Ticket Manager");
+            System.out.println("5. Exit");
+            System.out.print("Choose an option: ");
+            int mainChoice = scanner.nextInt();
+            scanner.nextLine(); // Consommer le reste de la ligne
+
+
+            switch (mainChoice) {
+                case 1:
+                    partnerManagerMenu(scanner, manager);
+                    break;
+                case 2:
+                    contractManagerMenu(scanner, contractManager);
+                    break;
+                case 3:
+                    promoManagerMenu(scanner, promoManager);
+                    break;
+                case 4:
+                    ticketManagerMenu(scanner, ticketManager);
+                    break;
+                case 5:
+                    running = false;
+                    System.out.println("Exiting the system.");
+                    break;
+                default:
+                    System.out.println("Invalid choice. Please choose again.");
+            }
+        }
+        scanner.close();
+        db.closeConnection();
+    }
+
+    public static void partnerManagerMenu(Scanner scanner, PartnershipManager manager) {
+        boolean partnerRunning = true;
+        while (partnerRunning) {
+            System.out.println("\nPartner Manager:");
             System.out.println("1. Add Partner");
             System.out.println("2. Modify Partner");
             System.out.println("3. Delete Partner");
             System.out.println("4. Display All Partners");
-            System.out.println("5. Exit");
-            System.out.println("6. Retrieve Partner by ID");
-            System.out.println("7. Add Contract");
-            System.out.println("8. Display Contracts");
-            System.out.println("9. Delete Contract");
-            System.out.println("10. Display All Contracts");
-            System.out.println("11. Update Contract");
-            System.out.println("12. Add Promo");
-            System.out.println("13. Delete Promo");
-            System.out.println("14. Display Promos");
-            System.out.println("15. Update Promo");
-            System.out.println("16. Add Ticket");
-            System.out.println("17. Delete Ticket");
-            System.out.println("18. Display Tickets");
-            System.out.println("19. Update Ticket");
+            System.out.println("5. Return to Main Menu");
+            System.out.println("6. Exit");
             System.out.print("Choose an option: ");
             int choice = scanner.nextInt();
             scanner.nextLine();
-
-            String companyName, businessContact, geographicZone, specialConditions, creationDate;
-            UUID partnerId, contractId, promoId, ticketId;
+            String companyName, businessContact, geographicZone, specialConditions;
+            Date creationDate;
             TransportType transportType;
             PartnerStatus partnerStatus;
-            Date startDate, endDate;
-            BigDecimal specialRate;
-            String agreementConditions;
-            boolean renewable;
-            ContractStatus contractStatus;
-            String offerName, description, conditions;
-            DiscountType discountType;
-            OfferStatus offerStatus;
-            BigDecimal purchasePrice, salePrice;
-            Date saleDate;
-            TicketStatus ticketStatus;
+            UUID partnerId;
 
             switch (choice) {
                 case 1:
-                    // Ajouter un partenaire
                     System.out.println("Enter partner details:");
-                    System.out.print("Company Name: ");
-                    companyName = scanner.nextLine();
-                    System.out.print("Business Contact: ");
-                    businessContact = scanner.nextLine();
-                    System.out.print("Transport Type: ");
-                    transportType = TransportType.valueOf(scanner.nextLine().toLowerCase());
-                    System.out.print("Geographic Zone: ");
-                    geographicZone = scanner.nextLine();
-                    System.out.print("Special Conditions: ");
-                    specialConditions = scanner.nextLine();
-                    System.out.print("Partner Status: ");
-                    partnerStatus = PartnerStatus.valueOf(scanner.nextLine().toLowerCase());
-                    System.out.print("Creation Date (YYYY-MM-DD): ");
-                    creationDate = scanner.nextLine();
+
+
+                    do {
+                        System.out.print("Company Name: ");
+                        companyName = scanner.nextLine();
+                    } while (!InputValidator.validateNonEmpty(companyName));
+
+
+                    do {
+                        System.out.print("Business Contact: ");
+                        businessContact = scanner.nextLine();
+                    } while (!InputValidator.validateNonEmpty(businessContact));
+
+
+                    while (true) {
+                        System.out.print("Transport Type (airplane, train , bus ): ");
+                        String transportTypeInput = scanner.nextLine();
+                        if(!InputValidator.validateNonEmpty(transportTypeInput)) {
+                            continue;
+                        }
+                        try {
+                            transportType = TransportType.valueOf(transportTypeInput.toLowerCase());
+                            break;
+                        } catch (IllegalArgumentException e) {
+                            System.out.println("Invalid Transport Type. Please enter a valid type (airplane, train , bus ).");
+                        }
+                    }
+
+                    do {
+                        System.out.print("Geographic Zone: ");
+                        geographicZone = scanner.nextLine();
+                    } while (!InputValidator.validateNonEmpty(geographicZone));
+
+
+                    do {
+                        System.out.print("Special Conditions: ");
+                        specialConditions = scanner.nextLine();
+                    } while (!InputValidator.validateNonEmpty(specialConditions));
+
+
+                    while (true) {
+                        System.out.print("Partner Status (e.g., active, inactive): ");
+                        String partnerStatusInput = scanner.nextLine();
+                        if(!InputValidator.validateNonEmpty(partnerStatusInput)) {
+                            continue;
+                        }
+                        try {
+                            partnerStatus = PartnerStatus.valueOf(partnerStatusInput.toLowerCase());
+                            break;
+                        } catch (IllegalArgumentException e) {
+                            System.out.println("Invalid Partner Status. Please enter a valid status (e.g., active, inactive).");
+                        }
+                    }
+
+                    while (true) {
+                        System.out.print("Creation Date (YYYY-MM-DD): ");
+                        String creationDateInput = scanner.nextLine();
+
+                        if(!InputValidator.validateNonEmpty(creationDateInput)) {
+                            continue;
+                        }
+                        try {
+                            creationDate = Date.valueOf(creationDateInput);
+                            break;
+                        } catch (IllegalArgumentException e) {
+                            System.out.println("Invalid date format. Please enter the date in YYYY-MM-DD format.");
+                        }
+
+                    }
 
                     Partner partner = new Partner(companyName, businessContact, transportType, geographicZone, specialConditions, partnerStatus, creationDate);
                     manager.addPartner(partner);
                     break;
-
                 case 2:
-                    // Modifier un partenaire
                     System.out.print("Enter Partner ID to modify: ");
                     partnerId = UUID.fromString(scanner.nextLine());
                     System.out.println("Enter new details:");
@@ -116,70 +183,120 @@ public class Main {
                     System.out.print("Partner Status: ");
                     partnerStatus = PartnerStatus.valueOf(scanner.nextLine().toLowerCase());
                     System.out.print("Creation Date (YYYY-MM-DD): ");
-                    creationDate = scanner.nextLine();
+                    creationDate = Date.valueOf(scanner.next());
 
                     manager.modifyPartner(partnerId, companyName, businessContact, transportType, geographicZone, specialConditions, partnerStatus, creationDate);
                     break;
-
                 case 3:
-                    // Supprimer un partenaire
                     System.out.print("Enter Partner ID to delete: ");
                     partnerId = UUID.fromString(scanner.nextLine());
                     manager.deletePartner(partnerId);
                     break;
-
                 case 4:
-                    // Afficher tous les partenaires
                     manager.displayPartners();
                     break;
-
                 case 5:
-                    running = false;
-                    System.out.println("Exiting the system.");
+                    partnerRunning = false;
                     break;
-
                 case 6:
-                    // Récupérer un partenaire par ID
-                    System.out.print("Enter Partner ID to retrieve: ");
-                    partnerId = UUID.fromString(scanner.nextLine());
-                    Partner retrievedPartner = manager.getPartnerById(partnerId);
-
-                    if (retrievedPartner != null) {
-                        System.out.println("Partner found:");
-                        System.out.println("Company Name: " + retrievedPartner.getCompanyName());
-                        System.out.println("Business Contact: " + retrievedPartner.getBusinessContact());
-                        System.out.println("Transport Type: " + retrievedPartner.getTransportType());
-                        System.out.println("Geographic Zone: " + retrievedPartner.getGeographicZone());
-                        System.out.println("Special Conditions: " + retrievedPartner.getSpecialConditions());
-                        System.out.println("Partner Status: " + retrievedPartner.getPartnerStatus());
-                        System.out.println("Creation Date: " + retrievedPartner.getCreationDate());
-                    } else {
-                        System.out.println("Partner not found with ID: " + partnerId);
-                    }
+                    System.exit(0);
                     break;
+                default:
+                    System.out.println("Invalid choice.");
+            }
+        }
+    }
 
-                case 7:
-                    // Ajouter un contrat
+    public static void contractManagerMenu(Scanner scanner, ContractManager contractManager) {
+        boolean contractRunning = true;
+        while (contractRunning) {
+            System.out.println("\nContract Manager:");
+            System.out.println("1. Add Contract");
+            System.out.println("2. Modify Contract");
+            System.out.println("3. Delete Contract");
+            System.out.println("4. Display All Contracts");
+            System.out.println("5. Return to Main Menu");
+            System.out.println("6. Exit");
+            System.out.print("Choose an option: ");
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+            PartnershipManager manager = new PartnershipManager();
+            UUID partnerId;
+            Date startDate;
+            Date endDate;
+            BigDecimal specialRate;
+            String agreementConditions;
+            boolean renewable;
+            ContractStatus contractStatus;
+            UUID contractId;
+
+
+            switch (choice) {
+                case 1:
                     System.out.print("Enter Partner ID to add a contract: ");
                     partnerId = UUID.fromString(scanner.nextLine());
                     Partner partnerToUpdate = manager.getPartnerById(partnerId);
 
                     if (partnerToUpdate != null) {
                         System.out.println("Enter contract details:");
-                        System.out.print("Contract Start Date (YYYY-MM-DD): ");
-                        startDate = Date.valueOf(scanner.nextLine());
-                        System.out.print("Contract End Date (YYYY-MM-DD): ");
-                        endDate = Date.valueOf(scanner.nextLine());
+                        while (true) {
+                            System.out.print("Contract Start Date (YYYY-MM-DD): ");
+                            String startDateInput = scanner.nextLine();
+
+                            if(!InputValidator.validateNonEmpty(startDateInput)) {
+                                continue;
+                            }
+                            try {
+                                startDate = Date.valueOf(startDateInput);
+                                break;
+                            } catch (IllegalArgumentException e) {
+                                System.out.println("Invalid date format. Please enter the date in YYYY-MM-DD format.");
+                            }
+
+                        }
+                        do {
+                            System.out.print("Contract End Date (YYYY-MM-DD): ");
+                            String endDateInput = scanner.nextLine();
+
+                            if (!InputValidator.validateNonEmpty(endDateInput)) {
+                                continue;
+                            }
+                            try {
+                                endDate = Date.valueOf(endDateInput);
+
+                                if (InputValidator.validateDateRange(startDate, endDate)) {
+                                    break;
+                                }
+                            } catch (IllegalArgumentException e) {
+                                System.out.println("Error: Invalid date format. Please enter the date in the format YYYY-MM-DD.");
+                            }
+
+                        } while (true);
+
                         System.out.print("Special Rate: ");
                         specialRate = scanner.nextBigDecimal();
                         scanner.nextLine();
-                        System.out.print("Agreement Conditions: ");
-                        agreementConditions = scanner.nextLine();
+                        do {
+                            System.out.print("Agreement Conditions: ");
+                            agreementConditions = scanner.nextLine();
+                        } while (!InputValidator.validateNonEmpty(agreementConditions));
                         System.out.print("Is Renewable (true/false): ");
                         renewable = scanner.nextBoolean();
                         scanner.nextLine();
-                        System.out.print("Contract Status: ");
-                        contractStatus = ContractStatus.valueOf(scanner.nextLine().toLowerCase());
+
+                        while (true) {
+                            System.out.print("Contrat Statuts (ongoing, terminated , suspended ): ");
+                            String contractStatusInput = scanner.nextLine();
+                            if(!InputValidator.validateNonEmpty(contractStatusInput)) {
+                                continue;
+                            }
+                            try {
+                                contractStatus = ContractStatus.valueOf(contractStatusInput.toLowerCase());
+                                break;
+                            } catch (IllegalArgumentException e) {
+                                System.out.println("Invalid Contrat Status. Please enter a valid status (ongoing, terminated , suspended).");
+                            }
+                        }
 
                         Contract newContract = new Contract(startDate, endDate, specialRate, agreementConditions, renewable, contractStatus, partnerId);
                         partnerToUpdate.addContract(newContract);
@@ -188,49 +305,7 @@ public class Main {
                         System.out.println("Partner not found with ID: " + partnerId);
                     }
                     break;
-
-                case 8:
-                    // Afficher les contrats d'un partenaire
-                    System.out.print("Enter Partner ID to display contracts: ");
-                    partnerId = UUID.fromString(scanner.nextLine());
-                    Partner partnerForContracts = manager.getPartnerById(partnerId);
-
-                    if (partnerForContracts != null) {
-                        List<Contract> contracts = partnerForContracts.getContracts();
-                        if (!contracts.isEmpty()) {
-                            System.out.println("Contracts for Partner ID: " + partnerId);
-                            for (Contract contract : contracts) {
-                                System.out.println("Contract ID: " + contract.getId());
-                                System.out.println("Start Date: " + contract.getStartDate());
-                                System.out.println("End Date: " + contract.getEndDate());
-                                System.out.println("Special Rate: " + contract.getSpecialRate());
-                                System.out.println("Agreement Conditions: " + contract.getAgreementConditions());
-                                System.out.println("Renewable: " + contract.isRenewable());
-                                System.out.println("Contract Status: " + contract.getContractStatus());
-                                System.out.println("-----");
-                            }
-                        } else {
-                            System.out.println("No contracts found for this partner.");
-                        }
-                    } else {
-                        System.out.println("Partner not found with ID: " + partnerId);
-                    }
-                    break;
-
-                case 9:
-                    // Supprimer un contrat
-                    System.out.print("Enter Contract ID to delete: ");
-                    contractId = UUID.fromString(scanner.next());
-                    contractManager.deleteContract(contractId);
-                    break;
-
-                case 10:
-                    // Afficher tous les contrats
-                    contractManager.displayContracts();
-                    break;
-
-                case 11:
-                    // Mettre à jour un contrat
+                case 2:
                     System.out.print("Enter Contract ID: ");
                     contractId = UUID.fromString(scanner.next());
 
@@ -244,7 +319,7 @@ public class Main {
                     specialRate = scanner.nextBigDecimal();
 
                     System.out.print("Enter new Agreement Conditions: ");
-                    scanner.nextLine(); // Pour consommer la ligne restante
+                    scanner.nextLine(); 
                     agreementConditions = scanner.nextLine();
 
                     System.out.print("Is the contract renewable? (true/false): ");
@@ -255,9 +330,48 @@ public class Main {
 
                     contractManager.updateContract(contractId, startDate, endDate, specialRate, agreementConditions, renewable, contractStatus);
                     break;
+                case 3:
+                    System.out.print("Enter Contract ID to delete: ");
+                    contractId = UUID.fromString(scanner.next());
+                    contractManager.deleteContract(contractId);
+                    break;
+                case 4:
+                    contractManager.displayContracts();
+                    break;
+                case 5:
+                    contractRunning = false;
+                    break;
+                case 6:
+                    System.exit(0);
+                    break;
+                default:
+                    System.out.println("Invalid choice.");
+            }
+        }
+    }
 
-                case 12:
-                    // Ajouter une promotion
+    public static void promoManagerMenu(Scanner scanner, PromoManager promoManager) {
+        boolean promoRunning = true;
+        while (promoRunning) {
+            System.out.println("\nPromo Manager:");
+            System.out.println("1. Add Promo");
+            System.out.println("2. Modify Promo");
+            System.out.println("3. Delete Promo");
+            System.out.println("4. Display All Promos");
+            System.out.println("5. Return to Main Menu");
+            System.out.println("6. Exit");
+            System.out.print("Choose an option: ");
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+            ContractManager contractManager = new ContractManager();
+            UUID contractId , promoId;
+            String offerName,description,conditions;
+            Date startDate , endDate;
+            DiscountType discountType;
+            OfferStatus offerStatus;
+
+            switch (choice) {
+                case 1:
                     System.out.print("Enter Contract ID to add a promo: ");
                     contractId = UUID.fromString(scanner.nextLine());
                     Contract contractForPromo = contractManager.getContractById(contractId);
@@ -285,21 +399,7 @@ public class Main {
                         System.out.println("Contract not found with ID: " + contractId);
                     }
                     break;
-
-                case 13:
-                    // Supprimer une promotion
-                    System.out.print("Enter Promo ID to delete: ");
-                    promoId = UUID.fromString(scanner.nextLine());
-                    promoManager.deletePromo(promoId);
-                    break;
-
-                case 14:
-                    // Afficher toutes les promotions
-                    promoManager.displayPromos();
-                    break;
-
-                case 15:
-                    // Mettre à jour une promotion
+                case 2:
                     System.out.print("Enter Promo ID to update: ");
                     promoId = UUID.fromString(scanner.nextLine());
 
@@ -324,12 +424,50 @@ public class Main {
                     System.out.print("Enter new Offer Status (e.g., active, expired): ");
                     offerStatus = OfferStatus.valueOf(scanner.nextLine().toLowerCase());
 
-
-                    // Mise à jour de la promotion avec tous les paramètres requis
                     promoManager.updatePromo(promoId, offerName, description, startDate, endDate,  discountType, conditions, offerStatus);
                     break;
-                case 16:
-                    // Ajouter un ticket
+                case 3:
+                    System.out.print("Enter Promo ID to delete: ");
+                    promoId = UUID.fromString(scanner.nextLine());
+                    promoManager.deletePromo(promoId);
+                    break;
+                case 4:
+                    promoManager.displayPromos();
+                    break;
+                case 5:
+                    promoRunning = false;
+                    break;
+                case 6:
+                    System.exit(0);
+                    break;
+                default:
+                    System.out.println("Invalid choice.");
+            }
+        }
+    }
+
+    public static void ticketManagerMenu(Scanner scanner, TicketManager ticketManager) {
+        boolean ticketRunning = true;
+        while (ticketRunning) {
+            System.out.println("\nTicket Manager:");
+            System.out.println("1. Add Ticket");
+            System.out.println("2. Modify Ticket");
+            System.out.println("3. Delete Ticket");
+            System.out.println("4. Display All Tickets");
+            System.out.println("5. Return to Main Menu");
+            System.out.println("6. Exit");
+            System.out.print("Choose an option: ");
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+            ContractManager contractManager = new ContractManager();
+            UUID contractId, ticketId;
+            BigDecimal purchasePrice , salePrice;
+            TransportType transportType;
+            TicketStatus ticketStatus;
+            Date saleDate;
+
+            switch (choice) {
+                case 1:
                     System.out.print("Enter Contract ID to add a ticket: ");
                     contractId = UUID.fromString(scanner.nextLine());
                     Contract contractForTicket = contractManager.getContractById(contractId);
@@ -355,21 +493,7 @@ public class Main {
                         System.out.println("Contract not found with ID: " + contractId);
                     }
                     break;
-
-                case 17:
-                    // Supprimer un ticket
-                    System.out.print("Enter Ticket ID to delete: ");
-                    ticketId = UUID.fromString(scanner.nextLine());
-                    ticketManager.deleteTicket(ticketId);
-                    break;
-
-                case 18:
-                    // Afficher tous les tickets
-                    ticketManager.displayTickets();
-                    break;
-
-                case 19:
-                    // Mettre à jour un ticket
+                case 2:
                     System.out.print("Enter Ticket ID to update: ");
                     ticketId = UUID.fromString(scanner.nextLine());
 
@@ -392,13 +516,29 @@ public class Main {
 
                     ticketManager.updateTicket(ticketId, transportType, purchasePrice, salePrice, saleDate, ticketStatus);
                     break;
-
-
+                case 3:
+                    System.out.print("Enter Ticket ID to delete: ");
+                    ticketId = UUID.fromString(scanner.nextLine());
+                    ticketManager.deleteTicket(ticketId);
+                    break;
+                case 4:
+                    ticketManager.displayTickets();
+                    break;
+                case 5:
+                    ticketRunning = false;
+                    break;
+                case 6:
+                    System.exit(0);
+                    break;
                 default:
-                    System.out.println("Invalid option. Please try again.");
+                    System.out.println("Invalid choice.");
+
             }
+
         }
-        scanner.close();
-        db.closeConnection();
+
+
+
     }
+
 }

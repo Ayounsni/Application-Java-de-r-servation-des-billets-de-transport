@@ -4,6 +4,7 @@ import models.enums.PartnerStatus;
 import models.enums.TransportType;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -15,11 +16,11 @@ public class Partner {
     private String geographicZone;
     private String specialConditions;
     private PartnerStatus partnerStatus;
-    private String creationDate;
+    private Date creationDate;
     private List<Contract> contracts;
 
 
-    public Partner(String companyName, String businessContact, TransportType transportType, String geographicZone, String specialConditions, PartnerStatus partnerStatus, String creationDate) {
+    public Partner(String companyName, String businessContact, TransportType transportType, String geographicZone, String specialConditions, PartnerStatus partnerStatus,Date creationDate) {
         this.id = UUID.randomUUID();
         this.companyName = companyName;
         this.businessContact = businessContact;
@@ -84,11 +85,11 @@ public class Partner {
         this.partnerStatus = partnerStatus;
     }
 
-    public String getCreationDate() {
+    public Date getCreationDate() {
         return creationDate;
     }
 
-    public void setCreationDate(String creationDate) {
+    public void setCreationDate(Date creationDate) {
         this.creationDate = creationDate;
     }
     public List<Contract> getContracts() {
